@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Sales Report</h2>
+    
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Total Events</h5>
+                    <h2>{{ report_data|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Tickets Sold</h5>
+                    <h2>{{ report_data|sum(attribute='tickets_sold') }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Revenue</h5>
+                    <h2>KES {{ "%.2f"|format(report_data|sum(attribute='revenue')) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Report -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Event-wise Sales Breakdown</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Total Tickets</th>
+                            <th>Tickets Sold</th>
+                            <th>Available</th>
+                            <th>Sell Rate</th>
+                            <th>Revenue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in report_data %}
+                        <tr>
+                            <td>{{ data.event.title }}</td>
+                            <td>{{ data.event.date.strftime('%d %b %Y') }}</td>
+                            <td>{{ data.event.ticket_quantity }}</td>
+                            <td>{{ data.tickets_sold }}</td>
+                            <td>{{ data.available }}</td>
+                            <td>
+                                {% set sell_rate = (data.tickets_sold / data.event.ticket_quantity * 100) %}
+                                <div class="progress">
+                                    <div class="progress-bar {% if sell_rate < 30 %}bg-danger{% elif sell_rate < 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         style="width: {{ sell_rate }}%">
+                                        {{ "%.1f"|format(sell_rate) }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td><strong>KES {{ "%.2f"|format(data.revenue) }}</strong></td>
+                            <td>
+                                <a href="{{ url_for('event_attendees', event_id=data.event.id) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-people"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Sales by Event</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Revenue by Event</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Sales Chart
+const salesCtx = document.getElementById('salesChart').getContext('2d');
+new Chart(salesCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for data in report_data %}'{{ data.event.title }}',{% endfor %}],
+        datasets: [{
+            label: 'Tickets Sold',
+            data: [{% for data in report_data %}{{ data.tickets_sold }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revenueCtx, {
+    type: 'pie',
+    data: {
+        labels: [{% for data in report_data %}'{{ data.event.title }}',{% endfor %}],
+        datasets: [{
+            data: [{% for data in report_data %}{{ data.revenue }},{% endfor %}],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)',
+            ],
+        }]
+    }
+});
+</script>
+
+{% endblock %}

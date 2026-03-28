@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Checkout</h2>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Payment Method -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Payment Method</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="paymentForm">
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="mpesa" value="mpesa" checked>
+                                <label class="form-check-label" for="mpesa">
+                                    <img src="https://safaricom.co.ke/images/m-pesa-logo.png" alt="M-PESA" height="30">
+                                    M-PESA
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="card" value="card">
+                                <label class="form-check-label" for="card">
+                                    <i class="bi bi-credit-card"></i>
+                                    Card Payment
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- M-PESA Instructions -->
+                        <div class="alert alert-info" id="mpesaInstructions">
+                            <h6><i class="bi bi-info-circle"></i> How to pay with M-PESA:</h6>
+                            <ol class="mb-0">
+                                <li>Go to M-PESA on your phone</li>
+                                <li>Select "Lipa Na M-PESA"</li>
+                                <li>Select "Pay Bill"</li>
+                                <li>Enter Business Number: <strong>123456</strong></li>
+                                <li>Enter Account Number: <strong>{{ current_user.id }}</strong></li>
+                                <li>Enter Amount: <strong>KES {{ "%.2f"|format(total) }}</strong></li>
+                                <li>Enter your M-PESA PIN and confirm</li>
+                                <li>You will receive an SMS with a confirmation code</li>
+                            </ol>
+                        </div>
+
+                        <!-- Card Payment Instructions -->
+                        <div class="alert alert-info" id="cardInstructions" style="display: none;">
+                            <h6><i class="bi bi-info-circle"></i> Card Payment:</h6>
+                            <p>You will be redirected to our secure payment gateway to complete your purchase.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>{{ item.event.title }} (x{{ item.quantity }})</td>
+                            <td class="text-end">KES {{ "%.2f"|format(item.event.ticket_price * item.quantity) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="2"><hr></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td class="text-end"><strong>KES {{ "%.2f"|format(total) }}</strong></td>
+                        </tr>
+                    </table>
+
+                    <button type="submit" form="paymentForm" class="btn btn-success w-100 btn-lg">
+                        <i class="bi bi-lock"></i> Complete Purchase
+                    </button>
+                    
+                    <a href="{{ url_for('view_cart') }}" class="btn btn-outline-secondary w-100 mt-2">
+                        Back to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mpesaRadio = document.getElementById('mpesa');
+    const cardRadio = document.getElementById('card');
+    const mpesaInstructions = document.getElementById('mpesaInstructions');
+    const cardInstructions = document.getElementById('cardInstructions');
+    
+    function toggleInstructions() {
+        if (mpesaRadio.checked) {
+            mpesaInstructions.style.display = 'block';
+            cardInstructions.style.display = 'none';
+        } else {
+            mpesaInstructions.style.display = 'none';
+            cardInstructions.style.display = 'block';
+        }
+    }
+    
+    mpesaRadio.addEventListener('change', toggleInstructions);
+    cardRadio.addEventListener('change', toggleInstructions);
+</script>
+
+{% endblock %}

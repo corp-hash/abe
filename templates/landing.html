@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Welcome to SokaTicket</h1>
+        <p class="lead mb-4">Your premier platform for buying and selling event tickets in Kenya</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form action="{{ url_for('browse_events') }}" method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control form-control-lg me-2" placeholder="Search for events...">
+                    <button type="submit" class="btn btn-light btn-lg">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Events -->
+<section class="container my-5">
+    <h2 class="text-center mb-4">Featured Events</h2>
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if event.image_url %}
+                <img src="{{ event.image_url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-calendar-event text-white" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text text-muted">
+                        <i class="bi bi-geo-alt"></i> {{ event.venue }}<br>
+                        <i class="bi bi-clock"></i> {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}<br>
+                        <i class="bi bi-tag"></i> KES {{ "%.2f"|format(event.ticket_price) }}
+                    </p>
+                    <span class="badge bg-primary">{{ event.category }}</span>
+                    {% if event.tickets_available > 0 %}
+                        <span class="badge badge-available">{{ event.tickets_available }} tickets left</span>
+                    {% else %}
+                        <span class="badge badge-soldout">Sold Out</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('browse_events') }}" class="btn btn-outline-primary btn-lg">Browse All Events</a>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="container my-5">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row">
+        <div class="col-md-4 text-center mb-4">
+            <div class="display-1 text-primary mb-3">1</div>
+            <h4>Find Events</h4>
+            <p>Browse through hundreds of events happening near you</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="display-1 text-primary mb-3">2</div>
+            <h4>Book Tickets</h4>
+            <p>Select your tickets and checkout securely with M-Pesa</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="display-1 text-primary mb-3">3</div>
+            <h4>Enjoy</h4>
+            <p>Get your e-tickets instantly and enjoy the event</p>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Browse by Category</h2>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('browse_events') }}?category=Music" class="text-decoration-none">
+                    <div class="card text-center p-4">
+                        <i class="bi bi-music-note-beamed display-4 text-primary"></i>
+                        <h5 class="mt-3">Music</h5>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('browse_events') }}?category=Sports" class="text-decoration-none">
+                    <div class="card text-center p-4">
+                        <i class="bi bi-trophy display-4 text-primary"></i>
+                        <h5 class="mt-3">Sports</h5>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('browse_events') }}?category=Comedy" class="text-decoration-none">
+                    <div class="card text-center p-4">
+                        <i class="bi bi-emoji-laughing display-4 text-primary"></i>
+                        <h5 class="mt-3">Comedy</h5>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('browse_events') }}?category=Theater" class="text-decoration-none">
+                    <div class="card text-center p-4">
+                        <i class="bi bi-film display-4 text-primary"></i>
+                        <h5 class="mt-3">Theater</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action for Vendors -->
+<section class="container my-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Are you an Event Organizer?</h2>
+            <p class="lead">Join SokaTicket as a vendor and reach thousands of potential attendees</p>
+            <a href="{{ url_for('register_vendor') }}" class="btn btn-success btn-lg">Register as Vendor</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

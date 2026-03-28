@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Welcome back, {{ current_user.username }}!</h2>
+    
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">My Tickets</h5>
+                    <h2>{{ my_tickets|length }}</h2>
+                    <p class="mb-0">Active tickets</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Events</h5>
+                    <h2>{{ upcoming_events|length }}</h2>
+                    <p class="mb-0">Events available</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Resale Tickets</h5>
+                    <h2>{{ resale_tickets|length }}</h2>
+                    <p class="mb-0">Available for resale</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Tickets -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>My Recent Tickets</h4>
+        </div>
+        <div class="card-body">
+            {% if my_tickets %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Venue</th>
+                            <th>Price Paid</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in my_tickets[:5] %}
+                        <tr>
+                            <td>{{ ticket.event.title }}</td>
+                            <td>{{ ticket.event.date.strftime('%d %b %Y, %I:%M %p') }}</td>
+                            <td>{{ ticket.event.venue }}</td>
+                            <td>KES {{ "%.2f"|format(ticket.price_paid) }}</td>
+                            <td>
+                                {% if ticket.is_for_sale %}
+                                <span class="badge bg-warning">For Resale</span>
+                                {% else %}
+                                <span class="badge bg-success">Active</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('ticket_resale', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-primary">Sell</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{{ url_for('my_tickets') }}" class="btn btn-primary">View All Tickets</a>
+            {% else %}
+            <p class="text-muted">You haven't purchased any tickets yet.</p>
+            <a href="{{ url_for('browse_events') }}" class="btn btn-primary">Browse Events</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Upcoming Events</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for event in upcoming_events[:3] %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">
+                                <i class="bi bi-geo-alt"></i> {{ event.venue }}<br>
+                                <i class="bi bi-clock"></i> {{ event.date.strftime('%d %b %Y, %I:%M %p') }}<br>
+                                <i class="bi bi-tag"></i> KES {{ "%.2f"|format(event.ticket_price) }}
+                            </p>
+                            <span class="badge bg-primary">{{ event.category }}</span>
+                            <span class="badge bg-success">{{ event.tickets_available }} left</span>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-sm btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('browse_events') }}" class="btn btn-outline-primary">Browse All Events</a>
+        </div>
+    </div>
+
+    <!-- Resale Tickets Available -->
+    {% if resale_tickets %}
+    <div class="card mt-4">
+        <div class="card-header bg-warning">
+            <h4>Resale Tickets Available</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for ticket in resale_tickets[:3] %}
+                <div class="col-md-4 mb-3">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ ticket.event.title }}</h5>
+                            <p class="card-text">
+                                <i class="bi bi-geo-alt"></i> {{ ticket.event.venue }}<br>
+                                <i class="bi bi-clock"></i> {{ ticket.event.date.strftime('%d %b %Y') }}<br>
+                                <i class="bi bi-tag"></i> <strong>Resale Price: KES {{ "%.2f"|format(ticket.resale_price) }}</strong><br>
+                                <small>Original: KES {{ "%.2f"|format(ticket.price_paid) }}</small>
+                            </p>
+                            <a href="{{ url_for('buy_resale', ticket_id=ticket.id) }}" class="btn btn-sm btn-warning">Buy Resale Ticket</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

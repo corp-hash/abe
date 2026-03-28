@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>{{ event.title }} - Attendees</h2>
+    <p class="text-muted">{{ event.date.strftime('%B %d, %Y at %I:%M %p') }} | {{ event.venue }}</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Ticket Holders ({{ tickets|length }})</h5>
+                    <button class="btn btn-sm btn-success" onclick="exportToCSV()">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if tickets %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="attendeesTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Ticket ID</th>
+                                    <th>Buyer</th>
+                                    <th>Purchase Date</th>
+                                    <th>Price Paid</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in tickets %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ ticket.id }}</td>
+                                    <td>{{ ticket.owner.username }}</td>
+                                    <td>{{ ticket.purchase_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>KES {{ "%.2f"|format(ticket.price_paid) }}</td>
+                                    <td>
+                                        {% if ticket.is_for_sale %}
+                                        <span class="badge bg-warning">Resale</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Valid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No tickets sold yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportToCSV() {
+    const table = document.getElementById('attendeesTable');
+    const rows = table.querySelectorAll('tr');
+    const csv = [];
+    
+    for (const row of rows) {
+        const cells = row.querySelectorAll('td, th');
+        const rowData = [];
+        for (const cell of cells) {
+            rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+        }
+        csv.push(rowData.join(','));
+    }
+    
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '{{ event.title }}_attendees.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+</script>
+
+{% endblock %}

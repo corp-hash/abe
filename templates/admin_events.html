@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Event Management</h2>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>All Events</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Vendor</th>
+                            <th>Date</th>
+                            <th>Tickets Sold</th>
+                            <th>Revenue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event.id }}</td>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.vendor.username }}</td>
+                            <td>{{ event.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ event.tickets_sold }}/{{ event.ticket_quantity }}</td>
+                            <td>KES {{ "%.2f"|format(event.tickets_sold * event.ticket_price) }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('admin_delete_event', event_id=event.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this event?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

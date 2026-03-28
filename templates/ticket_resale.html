@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Sell Your Ticket</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Event Details:</h6>
+                        <p>
+                            <strong>{{ ticket.event.title }}</strong><br>
+                            {{ ticket.event.date.strftime('%B %d, %Y at %I:%M %p') }}<br>
+                            {{ ticket.event.venue }}
+                        </p>
+                        <p>
+                            Original Price: KES {{ "%.2f"|format(ticket.price_paid) }}
+                        </p>
+                    </div>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="resale_price" class="form-label">Resale Price (KES)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">KES</span>
+                                <input type="number" class="form-control" id="resale_price" name="resale_price" 
+                                       step="0.01" min="{{ ticket.price_paid }}" required
+                                       value="{{ ticket.price_paid }}">
+                            </div>
+                            <div class="form-text">Minimum price: KES {{ "%.2f"|format(ticket.price_paid) }}</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle"></i> Important Information:</h6>
+                            <ul class="small mb-0">
+                                <li>Your ticket will be listed for sale immediately</li>
+                                <li>You can remove it from resale at any time</li>
+                                <li>When sold, funds will be sent to your M-PESA</li>
+                                <li>A 10% platform fee applies to resale tickets</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-cash"></i> List for Resale
+                            </button>
+                            <a href="{{ url_for('my_tickets') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

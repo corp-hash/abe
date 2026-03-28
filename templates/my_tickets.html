@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>My Tickets</h2>
+    
+    {% if tickets %}
+    <div class="row">
+        {% for ticket in tickets %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 {% if ticket.is_for_sale %}border-warning{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ ticket.event.title }}</h5>
+                    {% if ticket.is_for_sale %}
+                    <span class="badge bg-warning">For Resale</span>
+                    {% else %}
+                    <span class="badge bg-success">Active</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="mb-2">
+                                <i class="bi bi-geo-alt"></i> {{ ticket.event.venue }}<br>
+                                <i class="bi bi-clock"></i> {{ ticket.event.date.strftime('%B %d, %Y at %I:%M %p') }}<br>
+                                <i class="bi bi-tag"></i> Price Paid: KES {{ "%.2f"|format(ticket.price_paid) }}
+                            </p>
+                            {% if ticket.is_for_sale %}
+                            <p class="text-warning">
+                                <i class="bi bi-cash"></i> Resale Price: KES {{ "%.2f"|format(ticket.resale_price) }}
+                            </p>
+                            {% endif %}
+                            <p class="text-muted small">
+                                Purchased: {{ ticket.purchase_date.strftime('%Y-%m-%d %H:%M') }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- QR Code placeholder -->
+                            <div class="bg-light p-2 text-center">
+                                <i class="bi bi-qr-code" style="font-size: 3rem;"></i>
+                                <div class="small">Ticket #{{ ticket.id }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="btn-group w-100" role="group">
+                        {% if not ticket.is_for_sale %}
+                        <a href="{{ url_for('ticket_resale', ticket_id=ticket.id) }}" class="btn btn-outline-warning">
+                            <i class="bi bi-cash"></i> Sell
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('sell_ticket', ticket_id=ticket.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Remove from Resale
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-ticket display-1 text-muted"></i>
+        <h3 class="mt-3">No tickets yet</h3>
+        <p class="text-muted">You haven't purchased any tickets. Browse events and get your tickets now!</p>
+        <a href="{{ url_for('browse_events') }}" class="btn btn-primary btn-lg">Browse Events</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

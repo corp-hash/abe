@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Vendor Dashboard</h2>
+    <p class="lead">Welcome back, {{ current_user.username }}!</p>
+    
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total Events</h6>
+                    <h3>{{ my_events|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6>Tickets Sold</h6>
+                    <h3>{{ total_tickets_sold }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6>Total Revenue</h6>
+                    <h3>KES {{ "%.2f"|format(total_revenue) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6>Active Events</h6>
+                    <h3>{{ my_events|selectattr('date', '>', now())|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Quick Actions</h4>
+        </div>
+        <div class="card-body">
+            <a href="{{ url_for('create_event') }}" class="btn btn-success me-2">
+                <i class="bi bi-plus-circle"></i> Create New Event
+            </a>
+            <a href="{{ url_for('vendor_sales_report') }}" class="btn btn-info me-2">
+                <i class="bi bi-graph-up"></i> Sales Report
+            </a>
+        </div>
+    </div>
+
+    <!-- My Events -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">My Events</h4>
+            <span class="badge bg-primary">{{ my_events|length }} Total</span>
+        </div>
+        <div class="card-body">
+            {% if my_events %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Tickets Sold</th>
+                            <th>Available</th>
+                            <th>Revenue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in my_events %}
+                        <tr>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.date.strftime('%d %b %Y') }}</td>
+                            <td>{{ event.tickets_sold }}/{{ event.ticket_quantity }}</td>
+                            <td>
+                                <span class="badge {% if event.tickets_available > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ event.tickets_available }}
+                                </span>
+                            </td>
+                            <td>KES {{ "%.2f"|format(event.tickets_sold * event.ticket_price) }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-outline-warning" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{{ url_for('event_attendees', event_id=event.id) }}" class="btn btn-outline-info" title="Attendees">
+                                        <i class="bi bi-people"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">You haven't created any events yet.</p>
+            <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create Your First Event</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Sales -->
+    {% if recent_tickets %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Recent Sales</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Buyer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in recent_tickets %}
+                        <tr>
+                            <td>{{ ticket.event.title }}</td>
+                            <td>{{ ticket.owner.username }}</td>
+                            <td>{{ ticket.purchase_date.strftime('%d %b %Y %H:%M') }}</td>
+                            <td>KES {{ "%.2f"|format(ticket.price_paid) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

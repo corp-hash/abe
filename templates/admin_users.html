@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>User Management</h2>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>All Users</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('toggle_user_role', user_id=user.id) }}" class="d-inline">
+                                    <select name="role" class="form-select form-select-sm" onchange="this.form.submit()" {% if user.id == current_user.id %}disabled{% endif %}>
+                                        <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                                        <option value="vendor" {% if user.role == 'vendor' %}selected{% endif %}>Vendor</option>
+                                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ user.id }})" {% if user.id == current_user.id %}disabled{% endif %}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        // Implement delete functionality
+        alert('Delete functionality to be implemented');
+    }
+}
+</script>
+
+{% endblock %}
